@@ -1,98 +1,178 @@
-# Motorola Server
+k# 🚀 Motorola Server
 
-Panel de monitoreo en tiempo real para sistemas. Visualiza CPU, RAM, batería y estado del SO con actualizaciones automáticas vía WebSocket.
+<p align="center">
+  <b>Self-hosted mobile server running on Motorola hardware</b><br>
+  Android + Arch Linux ARM + Go + Astro
+</p>
 
-## Características
+---
 
-✨ **Frontend Astro + Tailwind**
-- Interfaz moderna y responsiva con diseño glassmorphism
-- Panel de monitoreo en tiempo real
-- Indicadores visuales de estado de conexión
-- Reconexión automática con reintentos
+## 📖 Overview
 
-⚡ **Backend Go**
-- API REST + WebSocket para streaming de datos
-- Monitoreo de CPU, RAM, batería y SO
-- Actualizaciones cada 2 segundos
-- Manejo robusto de conexiones
+Motorola Server transforms an Android device into a complete self-hosted Linux server environment.
 
-🐳 **DevOps**
-- Configuración Docker lista
-- Scripts de inicio automatizados
-- Migraciones de base de datos
+The project combines Android, Arch Linux ARM, Go and Astro to create a lightweight but powerful management platform running directly on mobile hardware.
 
-## Estructura
+Features include:
 
-```
+- 🐧 Arch Linux ARM environment inside Android
+- ⚡ Go backend API
+- 🌌 Astro web dashboard
+- 🔌 Real-time WebSocket communication
+- 📊 System monitoring
+- 🔋 Device telemetry
+- 🛠️ Automated server management
+
+The goal is to turn a smartphone into a portable Linux server.
+
+---
+
+# 🏗️ Architecture
+
+
+Motorola Device
+│
+├── Android
+│ │
+│ ├── Magisk
+│ │ └── Startup automation
+│ │
+│ └── Arch Linux ARM Chroot
+│ │
+│ ├── Go API Server
+│ │ Port: 8080
+│ │
+│ └── Astro Dashboard
+│ Port: 4321
+│
+└── Network
+│
+└── Browser / Remote Client
+
+
+---
+
+# 📂 Project Structure
+
+
 motorola-server/
-├── frontend/          # Astro + Tailwind CSS
-│   ├── src/pages/     # Página principal
-│   ├── src/lib/       # WebSocket client
-│   ├── src/styles/    # Estilos globales
-│   └── tailwind.config.js
-├── backend/           # Go API
-│   ├── cmd/server/    # Punto de entrada
-│   ├── internal/
-│   │   ├── api/       # WebSocket handler
-│   │   ├── handlers/  # HTTP endpoints
-│   │   ├── services/  # Lógica de sistema
-│   │   └── models/    # Estructuras
-│   └── go.mod
-├── database/          # Migraciones SQL
-├── docker/            # Dockerfile y compose
-└── scripts/           # Automation
-```
+│
+├── backend/ # Go backend
+│ │
+│ ├── cmd/
+│ │ └── server/
+│ │ └── main.go # Application entry point
+│ │
+│ ├── internal/
+│ │ │
+│ │ ├── api/ # WebSocket API
+│ │ ├── handlers/ # HTTP handlers
+│ │ ├── services/ # System services
+│ │ └── models/ # Data models
+│ │
+│ └── go.mod
+│
+├── frontend/ # Astro frontend
+│ │
+│ ├── src/
+│ │ ├── pages/
+│ │ ├── components/
+│ │ └── lib/
+│ │
+│ └── package.json
+│
+├── database/ # Database migrations
+│
+├── docker/ # Container configuration
+│
+├── scripts/ # Automation scripts
+│
+├── logs/ # Runtime logs
+│
+└── README.md
 
-## Instalación
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
+---
 
-### Backend
+# ⚙️ Features
+
+## ✅ Implemented
+
+- Go HTTP API
+- WebSocket real-time communication
+- CPU monitoring
+- RAM monitoring
+- Astro dashboard
+- Arch Linux ARM chroot
+- SSH administration
+- Git based development workflow
+
+---
+
+# 🚧 Planned Features
+
+## Device Monitoring
+
+- 🔋 Battery percentage
+- 🌡️ Temperature monitoring
+- 💾 Storage information
+- 📡 Network statistics
+- 📱 Android system information
+- ⚡ Charging state
+
+---
+
+## Server Management
+
+- Automatic startup with Magisk
+- Chroot lifecycle control
+- Service health checks
+- Remote command execution
+- Background services
+- Automatic recovery
+
+---
+
+## Dashboard
+
+- Real-time graphs
+- CPU history
+- RAM history
+- Battery charts
+- System logs
+- Service status
+- Device information cards
+
+---
+
+# 🧰 Technology Stack
+
+## Backend
+
+- Go
+- Gorilla WebSocket
+- gopsutil
+
+## Frontend
+
+- Astro
+- TypeScript
+- Tailwind CSS
+
+## System
+
+- Android
+- Magisk
+- Arch Linux ARM
+- OpenSSH
+
+---
+
+# 🚀 Running the Project
+
+## Start Backend
+
 ```bash
 cd backend
-go mod download
-go run ./cmd/server/main.go
-```
 
-## API
-
-### WebSocket
-- **URL**: `ws://localhost:8080/ws`
-- **Intervalo**: Datos cada 2s
-- **Datos enviados**:
-  ```json
-  {
-    "host": "guam",
-    "os": "linux",
-    "cpu": 25.5,
-    "ram": 80.3,
-    "battery": 85,
-    "time": "2026-07-23T10:30:45Z"
-  }
-  ```
-
-### REST
-- **GET** `/api/status` - Estado actual del sistema
-
-## Desarrollo
-
-Con Docker Compose:
-```bash
-docker-compose up
-```
-
-Frontend en `http://localhost:4321`
-Backend en `http://localhost:8080`
-
-## Stack
-
-- **Frontend**: Astro, Tailwind CSS, TypeScript
-- **Backend**: Go, Gorilla WebSocket, gopsutil
-- **Database**: PostgreSQL (opcional)
-- **DevOps**: Docker, Docker Compose
-# motorola-server
+go run cmd/server/main.go
