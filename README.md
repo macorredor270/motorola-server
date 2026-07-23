@@ -95,3 +95,4 @@ Backend en `http://localhost:8080`
 - **Backend**: Go, Gorilla WebSocket, gopsutil
 - **Database**: PostgreSQL (opcional)
 - **DevOps**: Docker, Docker Compose
+# motorola-server
