@@ -1,0 +1,166 @@
+---
+import '../styles/global.css';
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Panel de monitoreo del servidor Motorola en tiempo real" />
+    <title>Motorola Server</title>
+  </head>
+
+  <body class="min-h-screen bg-slate-950 text-slate-100">
+    <main class="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-4 py-10 sm:px-6 lg:px-8">
+      <section class="glass-panel overflow-hidden rounded-3xl border border-slate-800/80">
+        <div class="border-b border-slate-800/80 bg-slate-900/70 px-6 py-6 sm:px-8">
+          <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p class="mb-2 text-sm font-semibold uppercase tracking-[0.35em] text-cyan-400">Motorola Server</p>
+              <h1 class="text-3xl font-semibold sm:text-4xl">Panel de monitoreo en tiempo real</h1>
+              <p class="mt-2 max-w-2xl text-sm text-slate-400 sm:text-base">
+                Observa el estado del host, el consumo de CPU y RAM, junto con la última actualización en una sola vista.
+              </p>
+            </div>
+            <div id="connection-pill" class="inline-flex items-center gap-2 rounded-full border border-slate-700/70 bg-slate-800/80 px-4 py-2 text-sm text-slate-200">
+              <span class="status-dot h-2.5 w-2.5 rounded-full bg-amber-400"></span>
+              <span id="connection-text">Conectando...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <div class="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Estado actual</p>
+                <h2 id="host-name" class="mt-2 text-2xl font-semibold text-slate-50">Esperando datos...</h2>
+              </div>
+              <div id="status-badge" class="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-sm font-medium text-amber-300">
+                Esperando
+              </div>
+            </div>
+
+            <div id="status" class="mt-8 grid gap-4 sm:grid-cols-3">
+              <div class="metric-card rounded-2xl border border-slate-800/70 p-4">
+                <p class="text-sm text-slate-400">CPU</p>
+                <p id="cpu-value" class="mt-2 text-3xl font-semibold text-cyan-300">--</p>
+              </div>
+              <div class="metric-card rounded-2xl border border-slate-800/70 p-4">
+                <p class="text-sm text-slate-400">RAM</p>
+                <p id="ram-value" class="mt-2 text-3xl font-semibold text-fuchsia-300">--</p>
+              </div>
+              <div class="metric-card rounded-2xl border border-slate-800/70 p-4">
+                <p class="text-sm text-slate-400">Batería</p>
+                <p id="battery-value" class="mt-2 text-3xl font-semibold text-emerald-300">--</p>
+              </div>
+            </div>
+
+            <div class="mt-6 rounded-2xl border border-slate-800/70 bg-slate-950/70 p-4 text-sm text-slate-400">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span id="connection-message">Estableciendo conexión con el servidor WebSocket…</span>
+                <span id="last-updated" class="text-slate-500">Sin datos aún</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="rounded-2xl border border-slate-800/70 bg-gradient-to-br from-cyan-500/10 via-slate-900/70 to-fuchsia-500/10 p-6">
+            <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Resumen</p>
+            <h3 class="mt-3 text-xl font-semibold text-slate-50">Sistema saludable</h3>
+            <p class="mt-3 text-sm leading-6 text-slate-400">
+              La interfaz se actualiza automáticamente y muestra un estado visual claro según la conectividad del servidor.
+            </p>
+
+            <div class="mt-6 space-y-3 text-sm text-slate-300">
+              <div class="flex items-center justify-between rounded-xl border border-slate-800/70 bg-slate-900/60 px-4 py-3">
+                <span>Estado de conexión</span>
+                <span id="summary-state" class="font-medium text-amber-300">Conectando</span>
+              </div>
+              <div class="flex items-center justify-between rounded-xl border border-slate-800/70 bg-slate-900/60 px-4 py-3">
+                <span>Última lectura</span>
+                <span id="summary-time" class="font-medium text-slate-200">--</span>
+              </div>
+              <div class="flex items-center justify-between rounded-xl border border-slate-800/70 bg-slate-900/60 px-4 py-3">
+                <span>SO</span>
+                <span id="os-value" class="font-medium text-slate-200">--</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      import { connectSocket } from "../lib/socket";
+
+      const hostNameEl = document.getElementById("host-name");
+      const statusBadgeEl = document.getElementById("status-badge");
+      const connectionTextEl = document.getElementById("connection-text");
+      const connectionPillEl = document.getElementById("connection-pill");
+      const connectionMessageEl = document.getElementById("connection-message");
+      const cpuValueEl = document.getElementById("cpu-value");
+      const ramValueEl = document.getElementById("ram-value");
+      const batteryValueEl = document.getElementById("battery-value");
+      const lastUpdatedEl = document.getElementById("last-updated");
+      const summaryStateEl = document.getElementById("summary-state");
+      const summaryTimeEl = document.getElementById("summary-time");
+      const osValueEl = document.getElementById("os-value");
+
+      const formatValue = (value) => `${value.toFixed(1)}%`;
+
+      const setConnectionState = (state, message) => {
+        const stateStyles = {
+          connecting: {
+            badge: "text-amber-300 border-amber-500/20 bg-amber-500/10",
+            dot: "bg-amber-400",
+            text: "Conectando...",
+          },
+          connected: {
+            badge: "text-emerald-300 border-emerald-500/20 bg-emerald-500/10",
+            dot: "bg-emerald-400",
+            text: "Conectado",
+          },
+          reconnecting: {
+            badge: "text-amber-300 border-amber-500/20 bg-amber-500/10",
+            dot: "bg-amber-400",
+            text: "Reconectando...",
+          },
+          offline: {
+            badge: "text-rose-300 border-rose-500/20 bg-rose-500/10",
+            dot: "bg-rose-400",
+            text: "Sin conexión",
+          },
+        };
+
+        const style = stateStyles[state] ?? stateStyles.connecting;
+        statusBadgeEl.className = `rounded-full border px-3 py-1 text-sm font-medium ${style.badge}`;
+        connectionTextEl.textContent = style.text;
+        connectionMessageEl.textContent = message || "Esperando datos del servidor...";
+        summaryStateEl.textContent = style.text;
+        summaryStateEl.className = `font-medium ${state === "connected" ? "text-emerald-300" : state === "offline" ? "text-rose-300" : "text-amber-300"}`;
+        connectionPillEl.querySelector(".status-dot").className = `status-dot h-2.5 w-2.5 rounded-full ${style.dot}`;
+      };
+
+      const renderData = (data) => {
+        hostNameEl.textContent = data.host || "Servidor sin identificar";
+        cpuValueEl.textContent = formatValue(data.cpu ?? 0);
+        ramValueEl.textContent = formatValue(data.ram ?? 0);
+        batteryValueEl.textContent = data.battery != null ? `${data.battery}%` : "--";
+        osValueEl.textContent = data.os || "--";
+        const updatedAt = data.time ? new Date(data.time).toLocaleString() : "Sin datos aún";
+        lastUpdatedEl.textContent = `Última actualización: ${updatedAt}`;
+        summaryTimeEl.textContent = updatedAt;
+
+        if (data.status === "online") {
+          setConnectionState("connected", "Servidor respondiendo correctamente.");
+        } else {
+          setConnectionState("connected", "Datos recibidos del servidor.");
+        }
+      };
+
+      setConnectionState("connecting", "Estableciendo conexión con el servidor WebSocket…");
+
+      connectSocket(renderData, setConnectionState);
+    </script>
+  </body>
+</html>
