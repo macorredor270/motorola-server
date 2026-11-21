@@ -1,5 +1,12 @@
 # Motorola Server
 
+<p align="center">
+  <img alt="Go" src="https://img.shields.io/badge/Go-1.26-00ADD8?style=flat-square&logo=go&logoColor=white">
+  <img alt="Astro" src="https://img.shields.io/badge/Astro-frontend-BC52EE?style=flat-square&logo=astro&logoColor=white">
+  <img alt="WebSocket" src="https://img.shields.io/badge/WebSocket-tiempo%20real-2b2b2b?style=flat-square">
+  <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-2b2b2b?style=flat-square">
+</p>
+
 Panel de monitoreo en tiempo real para un teléfono Motorola reciclado como mini servidor casero. Un backend en Go lee las métricas del sistema y las transmite por WebSocket a un dashboard hecho con Astro.
 
 ## Qué hace (en la práctica)
@@ -88,3 +95,7 @@ Para acceder desde otro dispositivo de la red, usa la IP del equipo que corre el
 ---
 
 Proyecto hobby, hecho para aprender Go, WebSockets y Astro mientras le doy una segunda vida a un teléfono viejo.
+
+## Licencia
+
+[MIT](LICENSE) © 2026 macorredor270.
